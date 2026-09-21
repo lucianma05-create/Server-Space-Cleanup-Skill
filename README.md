@@ -11,13 +11,37 @@
 - 公共目录为多人可写：Skill 不会自动删除、覆盖、重命名或移动其中的内容。
 - checkpoint、微调权重、未知大文件仅作为待审查项，不会自动删除。
 
-## 使用
+## 快速开始
 
-将本目录放入 Codex 的 skills 目录后，在对话中直接描述需求，例如：
+1. 将 Skill 克隆到 Codex 的个人 skills 目录：
 
-> 请盘点我的个人服务器空间，并给出安全的多轮清理建议。
+   ```bash
+   git clone https://github.com/lucianma05-create/Server-Space-Cleanup-Skill.git \
+     ~/.codex/skills/server-space-cleanup
+   ```
 
-Skill 会先询问本次个人目录范围，并确认或替换公共模型、数据集路径。每一批删除、迁移或环境移除操作均需要用户明确指定项目编号或路径后再次确认。
+2. 重启 Codex 或新开一个会话。
+3. 在对话中直接输入：
+
+   > $server-space-cleanup 请盘点我的个人服务器空间，并给出安全的多轮清理建议。
+
+Skill 会先确认个人目录，以及模型和数据集的公共目录；在未获得逐项确认前，只进行盘点和建议，不会删除文件。
+
+## 常见操作
+
+### 保留旧代码路径
+
+若个人模型或数据集已验证与公共副本完全一致，但现有代码仍引用个人路径，可先完成“个人路径 → 公共副本”的软链接切换：脚本会保留带时间戳的个人备份，并在原路径建立绝对软链接。确认代码正常运行后，再单独确认删除备份以回收空间。
+
+```bash
+# 先校验内容，不修改路径
+python scripts/link_to_public.py /data/$USER/models/example /publicdata/model/example --verify
+
+# 确认无误后，执行备份与软链接切换
+python scripts/link_to_public.py /data/$USER/models/example /publicdata/model/example --verify --apply
+```
+
+若本次确认的公共根目录不是 `/publicdata`，请显式传入 `--public-root`。
 
 ## 实际使用流程
 
@@ -55,6 +79,18 @@ Skill 会先询问本次个人目录范围，并确认或替换公共模型、�
 
 ![提交前统一复核](image/8.png)
 
+### 9. 展示即将执行的精确处理清单
+
+![待执行的精确处理清单](image/9.png)
+
+### 10. 对不可恢复操作作最终确认
+
+![最终确认删除操作](image/10.png)
+
+### 11. 查看执行结果、回收空间与保留项
+
+![执行后的空间回收汇总](image/11.png)
+
 ## 辅助脚本
 
 两个脚本均为只读：
@@ -81,28 +117,3 @@ python scripts/fingerprint.py /path/to/model-or-dataset
 - 不使用未经审查的通配符进行删除。
 
 详细工作流见 [SKILL.md](SKILL.md)，本服务器的公共存储规则见 [references/storage-policy.md](references/storage-policy.md)。
-
-
-## V2：删除后保留原路径
-
-对于已确认与公共模型或数据集完全一致、但项目代码仍使用个人路径的内容，V2 可将原路径切换为指向公共目录的绝对软链接，避免清理后出现“找不到文件”。
-
-先只读验证：
-
-```bash
-python scripts/link_to_public.py \
-  /data/$USER/models/example \
-  /publicdata/model/example \
-  --verify
-```
-
-确认输出无误且没有活跃任务使用该路径后，才执行切换：
-
-```bash
-python scripts/link_to_public.py \
-  /data/$USER/models/example \
-  /publicdata/model/example \
-  --verify --apply
-```
-
-脚本会将个人副本改名为同级备份、在原位置创建绝对软链接并验证链接；**不会删除备份**。请先验证原有代码能正常运行，再在对话中明确确认删除脚本输出的那一个备份路径，以实际释放空间。若公共路径不是 `/publicdata` 下，请通过 `--public-root` 显式传入本次已确认的公共根目录。
