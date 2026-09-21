@@ -11,37 +11,22 @@
 - 公共目录为多人可写：Skill 不会自动删除、覆盖、重命名或移动其中的内容。
 - checkpoint、微调权重、未知大文件仅作为待审查项，不会自动删除。
 
-## 快速开始
+## 最快使用：复制给你的 Agent
 
-1. 将 Skill 克隆到 Codex 的个人 skills 目录：
+打开 Codex、Claude Code 或其他支持 Skill 的 Agent，将下面整段话直接发送：
 
-   ```bash
-   git clone https://github.com/lucianma05-create/Server-Space-Cleanup-Skill.git \
-     ~/.codex/skills/server-space-cleanup
-   ```
+```text
+请从 GitHub 仓库下载并安装这个 Skill：
+https://github.com/lucianma05-create/Server-Space-Cleanup-Skill.git
 
-2. 重启 Codex 或新开一个会话。
-3. 在对话中直接输入：
+请使用你支持的原生 Skill 安装方式；若没有安装器，再将完整仓库克隆到你自己的 Skill 目录。
+不要覆盖已有同名 Skill，除非先向我确认。完成后告诉我安装位置，以及是否需要新开会话。
 
-   > $server-space-cleanup 请盘点我的个人服务器空间，并给出安全的多轮清理建议。
-
-Skill 会先确认个人目录，以及模型和数据集的公共目录；在未获得逐项确认前，只进行盘点和建议，不会删除文件。
-
-## 常见操作
-
-### 保留旧代码路径
-
-若个人模型或数据集已验证与公共副本完全一致，但现有代码仍引用个人路径，可先完成“个人路径 → 公共副本”的软链接切换：脚本会保留带时间戳的个人备份，并在原路径建立绝对软链接。确认代码正常运行后，再单独确认删除备份以回收空间。
-
-```bash
-# 先校验内容，不修改路径
-python scripts/link_to_public.py /data/$USER/models/example /publicdata/model/example --verify
-
-# 确认无误后，执行备份与软链接切换
-python scripts/link_to_public.py /data/$USER/models/example /publicdata/model/example --verify --apply
+然后使用 server-space-cleanup 盘点我的个人服务器空间：先确认个人目录、公共模型目录和公共数据集目录；
+只做只读盘点和清理建议，不要删除、移动或修改任何文件，直到我逐项确认。
 ```
 
-若本次确认的公共根目录不是 `/publicdata`，请显式传入 `--public-root`。
+安装完成后，Skill 会按多轮对话引导你确认目录、审查候选项，并在未获得逐项确认前保持只读。
 
 ## 实际使用流程
 
@@ -91,7 +76,23 @@ python scripts/link_to_public.py /data/$USER/models/example /publicdata/model/ex
 
 ![执行后的空间回收汇总](image/11.png)
 
-## 辅助脚本
+## 操作与工具
+
+### 保留旧代码路径
+
+若个人模型或数据集已验证与公共副本完全一致，但现有代码仍引用个人路径，可先完成“个人路径 → 公共副本”的软链接切换：脚本会保留带时间戳的个人备份，并在原路径建立绝对软链接。确认代码正常运行后，再单独确认删除备份以回收空间。
+
+```bash
+# 先校验内容，不修改路径
+python scripts/link_to_public.py /data/$USER/models/example /publicdata/model/example --verify
+
+# 确认无误后，执行备份与软链接切换
+python scripts/link_to_public.py /data/$USER/models/example /publicdata/model/example --verify --apply
+```
+
+若本次确认的公共根目录不是 `/publicdata`，请显式传入 `--public-root`。
+
+### 只读盘点与校验
 
 两个脚本均为只读：
 
