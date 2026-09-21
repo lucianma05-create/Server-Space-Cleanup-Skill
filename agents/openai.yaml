@@ -1,0 +1,4 @@
+interface:
+  display_name: "服务器冗余空间清理"
+  short_description: "审计并安全释放服务器冗余磁盘空间"
+  default_prompt: "请盘点我的个人服务器空间，并给出安全的多轮清理建议。"
