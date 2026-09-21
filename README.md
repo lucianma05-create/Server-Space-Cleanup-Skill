@@ -45,3 +45,28 @@ python scripts/fingerprint.py /path/to/model-or-dataset
 - 不使用未经审查的通配符进行删除。
 
 详细工作流见 [SKILL.md](SKILL.md)，本服务器的公共存储规则见 [references/storage-policy.md](references/storage-policy.md)。
+
+
+## V2：删除后保留原路径
+
+对于已确认与公共模型或数据集完全一致、但项目代码仍使用个人路径的内容，V2 可将原路径切换为指向公共目录的绝对软链接，避免清理后出现“找不到文件”。
+
+先只读验证：
+
+```bash
+python scripts/link_to_public.py \
+  /data/$USER/models/example \
+  /publicdata/model/example \
+  --verify
+```
+
+确认输出无误且没有活跃任务使用该路径后，才执行切换：
+
+```bash
+python scripts/link_to_public.py \
+  /data/$USER/models/example \
+  /publicdata/model/example \
+  --verify --apply
+```
+
+脚本会将个人副本改名为同级备份、在原位置创建绝对软链接并验证链接；**不会删除备份**。请先验证原有代码能正常运行，再在对话中明确确认删除脚本输出的那一个备份路径，以实际释放空间。若公共路径不是 `/publicdata` 下，请通过 `--public-root` 显式传入本次已确认的公共根目录。
